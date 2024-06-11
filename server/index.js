@@ -12,6 +12,7 @@ import connectMongo from "connect-mongodb-session";
 import { User } from "./graphql/user/index.js";
 import { connectDB } from "./db/db.js";
 import { configurePassport } from "./passport/passport.config.js";
+import { buildContext } from "graphql-passport";
 
 configurePassport();
 
@@ -29,7 +30,7 @@ const store = new MongoDBStore({
 store.on("error", (error) => console.log(error));
 app.use(
   session({
-    secret: process.env.SESSION_SECRET,
+    secret: String(process.env.SESSION_SECRET),
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -69,7 +70,7 @@ app.use(
   cors({ origin: "http://localhost:3000", credentials: true }),
   express.json(),
   expressMiddleware(server, {
-    context: async ({ req }) => ({ req }),
+    context: async ({ req, res }) => buildContext({ req, res }),
   })
 );
 
